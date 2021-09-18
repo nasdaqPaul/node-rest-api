@@ -1,0 +1,9 @@
+{
+  "dbConfig": {
+    "host": "127.0.0.1",
+    "port": "27017",
+    "username": "mongoose",
+    "password": "1234",
+    "database": "test"
+  }
+}
