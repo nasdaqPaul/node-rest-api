@@ -6,21 +6,20 @@ module.exports = {
         await newUser.hashPassword();
         try {
             await newUser.save();
-        }
-        catch (e) {
-            throw new Error('UserExists');
+        } catch (e) {
+            throw new Error('UserAlreadyExists');
         }
     },
     async getUserByID(userID) {
-
-    },
-    async getUserByEmail(emailAddress) {
         try {
-            return await User.findOne({emailAddress: emailAddress})
+            return await User.findById(userID)
         } catch (e) {
             console.log(e);
             return null;
         }
+    },
+    async getUserByEmail(emailAddress) {
+        return User.findOne({emailAddress: emailAddress})
     },
     async deleteUser(userID) {
 

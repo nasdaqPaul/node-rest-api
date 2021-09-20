@@ -1,4 +1,4 @@
-const {getUserNote, createUserNote, deleteUserNote} = require("../../services/notes");
+const {getUserNote, createUserNote, deleteUserNote, replaceUserNote} = require("../../services/notes");
 
 const noteController = {
     async get(req, res) {
@@ -9,10 +9,20 @@ const noteController = {
         if (!note) {
             return res.status(404).json(`Note with id ${noteID} was not found`);
         }
-        res.json(note);
+        return res.json(note);
     },
     async put(req, res) {
-        res.send()
+        const {noteID} = req.params;
+        const user = req.user;
+        const newNote = req.body;
+
+        try {
+            await replaceUserNote(user.id, noteID, newNote);
+        }
+        catch (e) {
+            return res.status(404).json(`User note with id ${noteID} was not found`);
+        }
+        return res.json();
     },
     async patch(req, res) {
         res.send()
@@ -37,6 +47,10 @@ const notesController = {
         return res.status(201).end();
     },
     async delete(req, res) {
+        const {noteID} = req.params;
+        const user = req.user;
+
+        deleteUserNote()
         res.end()
     }
 }

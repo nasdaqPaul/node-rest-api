@@ -16,6 +16,15 @@ const notesSchemas = {
         }),
         params: Joi.object(),
         query: Joi.object()
+    }),
+    PUT: Joi.object({
+        body: Joi.object({
+            title: Joi.string().required(),
+            content: Joi.string().required(),
+            favourite: Joi.boolean().default(false),
+            images: Joi.array().items(Joi.string()),
+            todos: Joi.array().items(todoSchema)
+        })
     })
 }
 

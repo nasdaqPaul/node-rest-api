@@ -2,16 +2,17 @@ const Note = require('../db/models/note');
 
 module.exports = {
     async createUserNote(userID, note) {
-        await Note.create({
-            author: userID,
-            ...note
-        })
+        try {
+            await Note.create({
+                author: userID,
+                ...note
+            })
+        }catch (e) {
+            throw new Error('UserDoesNotExist')
+        }
     },
     async deleteUserNote(userID, noteID) {
-        return Note.findOneAndDelete({
-            _id: noteID,
-            author: userID
-        }).lean();
+        await Note.deleteOne({_id: noteID, author: userID});
     },
     async getUserNote(userID, noteID) {
         try {
@@ -21,6 +22,31 @@ module.exports = {
             }).lean();
         } catch (e) {
             return null
+        }
+    },
+    async replaceUserNote(userID, noteID, newNote) {
+        try {
+            await Note.findOneAndReplace({
+                _id: noteID,
+                author: userID
+            },{
+                ...newNote,
+                author: userID
+            });
+        }
+        catch (e) {
+            throw new Error('UserDoesNotExist');
+        }
+    },
+    async updateUserNote(userID, noteID, newNote){
+        try {
+            Note.findOneAndUpdate({
+                author: userID,
+                _id: noteID
+            }, newNote)
+        }catch (e) {
+            console.log(e);
+            throw new Error('NoteDoesNoteExist')
         }
     }
 }
