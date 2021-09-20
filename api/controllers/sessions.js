@@ -16,10 +16,8 @@ module.exports.sessionsController = {
 
         if (!user) res.status(401).json('Invalid username or password');
         if (!await user.checkPassword(password)) res.status(401).json('Invalid username or password');
-
         let token = await generateAccessToken(user);
-
-        res.status(200).json({
+        return res.status(200).json({
             accessToken: token
         });
     }

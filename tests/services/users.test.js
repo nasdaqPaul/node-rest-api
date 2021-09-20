@@ -1,4 +1,4 @@
-const {createUser, getUserByEmail, getUserByID} = require('../../services/users');
+const {createUser, getUserByEmail, getUserByID, deleteUser, updateUser} = require('../../services/users');
 const {connect, disconnect} = require('../../db');
 const User = require('../../db/models/user');
 
@@ -53,13 +53,37 @@ describe('UserService', function () {
            await expect(createUser(testUser0)).rejects.toThrow("UserAlreadyExists");
         })
     });
-
     describe('getUserByEmail', function () {
         test('It returns a user for a valid email address', async function () {
             expect(await getUserByEmail(testUser0.emailAddress)).toBeTruthy();
         });
         test('It returns null for a user that does not exist', async function () {
             expect(await getUserByEmail('notExist@gmail.com')).toBeNull()
+        })
+    });
+    describe('updateUser', function () {
+        test('It updates an existing user', async () => {
+            const existingUser0 = await User.findOne({emailAddress: testUser1.emailAddress}).lean();
+            const newUser = {
+                lastName: 'test3'
+            }
+
+            await updateUser(existingUser0._id, newUser);
+            expect (await User.exists({_id: existingUser0._id, lastName: existingUser0.lastName})).toBe(false);
+            expect (await User.exists({_id: existingUser0._id, lastName: newUser.lastName})).toBe(true);
+        });
+        // test("It throws a 'UserNotFound' when a user doesn't exist")
+    })
+    describe('deleteUser', () => {
+        test('It deletes an existing user', async () => {
+            const existingUser0 = await User.findOne({emailAddress: testUser0.emailAddress}).lean();
+            await deleteUser(existingUser0._id);
+            expect(await User.exists({_id: existingUser0._id})).toBe(false);
+        })
+        test("It throws a 'UserNotFound' for a user ID that does not exist", async () => {
+            const existingUser1 = await User.findOne({emailAddress: testUser1.emailAddress}).lean();
+            await deleteUser(existingUser1._id);
+            await expect(deleteUser(existingUser1._id)).rejects.toThrow('UserNotFound');
         })
     })
 })

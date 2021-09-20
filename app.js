@@ -7,6 +7,8 @@ const config = require('config');
 
 app.use('/api', api);
 
-app.listen(3000, async function () {
-    await connect(config.get('dbConfig'));
-})
+module.exports = app
+
+// app.listen(3000, async function () {
+//     await connect(config.get('dbConfig'));
+// })

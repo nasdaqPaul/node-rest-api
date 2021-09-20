@@ -67,7 +67,7 @@ describe('notesService', () => {
                 ...newNote
             }).lean()).toBeTruthy();
         })
-        test("It throws 'UserDoeNotExist' for a user that does not exist", async ()=> {
+        test("It throws 'UserDoeNotExist' for a user that does not exist", async () => {
             const newNote = {
                 title: 'TestNote',
                 content: 'Test Content 1'
@@ -75,7 +75,7 @@ describe('notesService', () => {
             await expect(createUserNote('someRandomID', newNote)).rejects.toThrow('UserDoesNotExist');
         })
     });
-    describe('getUserNote', ()=> {
+    describe('getUserNote', () => {
         test('It returns a note for a valid user', async () => {
             const existingUser = await User.findOne({emailAddress: testUser0.emailAddress}).lean();
             const existingNote = await Note.findOne({...testNote0});
@@ -94,7 +94,7 @@ describe('notesService', () => {
 
         })
     });
-    describe('replaceUserNote', ()=>{
+    describe('replaceUserNote', () => {
         test('It replaces a note', async () => {
             const existingUser0 = await User.findOne({emailAddress: testUser0.emailAddress});
             const userNote = new Note({
@@ -105,14 +105,47 @@ describe('notesService', () => {
             await userNote.save();
             const newNote = {
                 title: 'TestNote',
-                content: 'NewNote'
+                content: 'NewNote',
+                author: 'randomId'
             }
             await replaceUserNote(existingUser0._id, userNote._id, newNote);
-            expect(await Note.exists({_id: userNote._id, author: existingUser0._id, title: 'TestNote', content: 'Test Content 4'})).toBe(false);
-            expect(await Note.exists({_id: userNote._id, author: existingUser0._id, title: 'TestNote', content: 'NewNote'})).toBe(true);
+            expect(await Note.exists({
+                _id: userNote._id,
+                author: existingUser0._id,
+                title: 'TestNote',
+                content: 'Test Content 4'
+            })).toBe(false);
+            expect(await Note.exists({
+                _id: userNote._id,
+                author: existingUser0._id,
+                title: 'TestNote',
+                content: 'NewNote'
+            })).toBe(true);
+        });
+        test("It throws a 'NoteNoteFound' for a note that does not exist", async () => {
+            const existingUser0 = await User.findOne({emailAddress: testUser0.emailAddress}).lean();
+            const existingNote1 = await Note.findOne(testNote1).lean();
+
+            await expect(replaceUserNote(existingUser0._id, existingNote1._id, {
+                title: 'TestNote',
+                content: 'Test Content 4'
+            })).rejects.toThrow('NoteNotFound');
+            await expect(replaceUserNote(existingUser0._id, "someRandomID", {
+                title: 'TestNote',
+                content: 'Test Content 4'
+            })).rejects.toThrow('NoteNotFound');
+            await expect(replaceUserNote("someRandomID", existingNote1._id, {
+                title: 'TestNote',
+                content: 'Test Content 4'
+            })).rejects.toThrow('NoteNotFound');
+            await expect(replaceUserNote("someRandomID", "anotherRandomID", {
+                title: 'TestNote',
+                content: 'Test Content 4'
+            })).rejects.toThrow('Cast to ObjectId failed');
+
         })
     })
-    describe('deleteUserNote',() => {
+    describe('deleteUserNote', () => {
         test('It deletes a user note', async () => {
             const existingUser0 = await User.findOne({emailAddress: testUser0.emailAddress}).lean();
             const newNote = new Note({
@@ -124,11 +157,16 @@ describe('notesService', () => {
             await deleteUserNote(existingUser0._id, newNote._id);
 
             expect(await Note.exists({_id: newNote._id})).toBe(false);
-        })
-        test("It throws a 'UserDoesNotExist' for an invalid user ID", async ()=> {
-
         });
-        test("It throws a 'NoteNotFound' when note to delete is not found", async ()=> {
+        test("It throws a 'NoteNotFound' when note to delete is not found", async () => {
+            const existingUser0 = await User.findOne({emailAddress: testUser0.emailAddress}).lean();
+            const existingNote0 = await Note.findOne(testNote0).lean();
+            const existingNote1 = await Note.findOne(testNote1).lean();
+
+            await expect(deleteUserNote(existingUser0._id, existingNote1._id)).rejects.toThrow('NoteNotFound');
+            await expect(deleteUserNote(existingUser0._id, 'someRandomId')).rejects.toThrow('NoteNotFound');
+            await expect(deleteUserNote('randomID', existingNote1._id)).rejects.toThrow('Cast to ObjectId failed');
+            await expect(deleteUserNote('randomID', "anotherRandomId")).rejects.toThrow('Cast to ObjectId failed');
 
         })
     });

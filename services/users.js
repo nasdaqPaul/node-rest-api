@@ -22,6 +22,18 @@ module.exports = {
         return User.findOne({emailAddress: emailAddress})
     },
     async deleteUser(userID) {
-
+        await User.deleteOne({
+            _id: userID
+        }).then(resutls => {
+            if (resutls.deletedCount === 0) throw new Error('UserNotFound')
+        })
+    },
+    async updateUser(userID, newUser) {
+        await User.findByIdAndUpdate(userID, {
+            ...newUser,
+            _id: userID
+        }).then(results => {
+            if(results.matchedCount === 0) throw new Error('UserNotFound');
+        })
     }
 }

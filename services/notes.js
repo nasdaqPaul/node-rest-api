@@ -1,5 +1,6 @@
 const Note = require('../db/models/note');
 
+
 module.exports = {
     async createUserNote(userID, note) {
         try {
@@ -7,46 +8,33 @@ module.exports = {
                 author: userID,
                 ...note
             })
-        }catch (e) {
+        } catch (e) {
             throw new Error('UserDoesNotExist')
         }
     },
     async deleteUserNote(userID, noteID) {
-        await Note.deleteOne({_id: noteID, author: userID});
+        await Note.deleteOne({author: userID, _id: noteID}).then(results => {
+            if (results.deletedCount === 0) throw new Error('NoteNotFound');
+        });
     },
     async getUserNote(userID, noteID) {
         try {
-            return await Note.findOne({
-                _id: noteID,
-                author: userID
-            }).lean();
+            return await Note.findOne({_id: noteID, author: userID}).lean();
         } catch (e) {
             return null
         }
     },
-    async replaceUserNote(userID, noteID, newNote) {
-        try {
-            await Note.findOneAndReplace({
-                _id: noteID,
-                author: userID
-            },{
-                ...newNote,
-                author: userID
-            });
-        }
-        catch (e) {
-            throw new Error('UserDoesNotExist');
-        }
+    async getAllUserNotes(userID) {
+        return Note.find({author: userID}).lean();
     },
-    async updateUserNote(userID, noteID, newNote){
-        try {
-            Note.findOneAndUpdate({
-                author: userID,
-                _id: noteID
-            }, newNote)
-        }catch (e) {
-            console.log(e);
-            throw new Error('NoteDoesNoteExist')
-        }
+    async replaceUserNote(userID, noteID, newNote) {
+        await Note.replaceOne({author: userID, _id: noteID,}, {...newNote, author: userID}).then(results => {
+            if (results.matchedCount === 0) throw new Error('NoteNotFound');
+        })
+    },
+    async updateUserNote(userID, noteID, newNote) {
+        await Note.findOneAndUpdate({author: userID, _id: noteID}, {...newNote, author: userID}).then(results => {
+            if (results.matchedCount === 0) throw new Error('NoteNotFound');
+        })
     }
 }
