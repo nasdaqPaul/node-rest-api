@@ -5,5 +5,11 @@
     "username": "mongoose",
     "password": "1234",
     "database": "test"
+  },
+  "bcrypt": {
+
+  },
+  "jwt": {
+    "secret": "secret"
   }
 }
