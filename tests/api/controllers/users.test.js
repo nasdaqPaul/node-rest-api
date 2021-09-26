@@ -9,42 +9,42 @@ const app = express()
 app.use('/', apiRouter)
 
 describe('/api/users', () => {
-  beforeAll(async () => {
-    await connect(config.get('dbConfig'))
-  })
-  afterAll(async () => {
-    await User.deleteMany({ firstName: 'test' })
-    await disconnect()
-  })
-  describe('POST', () => {
-    test('It validates requests', async () => {
-      const response = await request(app).post('/users').send({
-        firstName: 'Silla'
-      })
-      expect(response.statusCode).toBe(400)
+    beforeAll(async () => {
+        await connect(config.get('dbConfig'))
     })
-    test('It creates a user', async () => {
-      const newUser = {
-        firstName: 'test',
-        lastName: 'test1',
-        emailAddress: 'test1@gmail.com',
-        password: '1234'
-      }
-      const response = await request(app).post('/users').send(newUser)
-      expect(response.statusCode).toBe(201)
+    afterAll(async () => {
+        await User.deleteMany({ firstName: 'test' })
+        await disconnect()
+    })
+    describe('POST', () => {
+        test('It validates requests', async () => {
+            const response = await request(app).post('/users').send({
+                firstName: 'Silla'
+            })
+            expect(response.statusCode).toBe(400)
+        })
+        test('It creates a user', async () => {
+            const newUser = {
+                firstName: 'test',
+                lastName: 'test1',
+                emailAddress: 'test1@gmail.com',
+                password: '1234'
+            }
+            const response = await request(app).post('/users').send(newUser)
+            expect(response.statusCode).toBe(201)
 
-      const createdUser = await User.findOne({ emailAddress: newUser.emailAddress }).lean()
-      expect(createdUser.password).not.toEqual(newUser.password)
+            const createdUser = await User.findOne({ emailAddress: newUser.emailAddress }).lean()
+            expect(createdUser.password).not.toEqual(newUser.password)
+        })
+        test('It does not create a user if user exists', async () => {
+            const newUser = {
+                firstName: 'test',
+                lastName: 'test1',
+                emailAddress: 'test1@gmail.com',
+                password: '1234'
+            }
+            const response = await request(app).post('/users').send(newUser)
+            expect(response.statusCode).toBe(409)
+        })
     })
-    test('It does not create a user if user exists', async () => {
-      const newUser = {
-        firstName: 'test',
-        lastName: 'test1',
-        emailAddress: 'test1@gmail.com',
-        password: '1234'
-      }
-      const response = await request(app).post('/users').send(newUser)
-      expect(response.statusCode).toBe(409)
-    })
-  })
 })

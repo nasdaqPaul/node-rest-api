@@ -13,8 +13,8 @@ const apiRouter = express.Router()
 apiRouter.use(bodyParser.json())
 apiRouter.use(morgan('dev'))
 
-apiRouter.use('/note/:noteID/todo', requiresAuthentication, todoRouter)
-apiRouter.use('/note/:noteID/todos', requiresAuthentication, todosRouter)
+apiRouter.use('/note/', requiresAuthentication, todoRouter)
+apiRouter.use('/note/', requiresAuthentication, todosRouter)
 
 apiRouter.use('/note', requiresAuthentication, noteRouter)
 apiRouter.use('/notes', requiresAuthentication, notesRouter)
